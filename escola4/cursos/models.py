@@ -16,6 +16,7 @@ class Curso(Base):
     class Meta:
         verbose_name = "Curso"
         verbose_name_plural = "Cursos"
+        ordering = ['id']
 
     #Construtor
     def __str__(self):
@@ -33,6 +34,7 @@ class Avaliacao(Base):
         verbose_name = "Avalição"
         verbose_name = "Avaliações"
         unique_together = ["email", "curso"]
+        ordering = ['id']
 
     def __str__(self):
         # Format do python

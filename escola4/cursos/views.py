@@ -49,8 +49,17 @@ class CursoViewSet(viewsets.ModelViewSet):
     def avaliacoes (self, request, pk=None):
         # Função que pega o curso e relaciona com as avaliações (podem ser nenhuma ou várias)
         # E retorna os dados serializados
-        curso = self.get_object()
-        serializer = AvaliacaoSerializer(curso.avaliacoes.all(), many = True)
+      
+        #Pagination:
+        self.paginate_class.page_size = 1
+        avaliacoes = Avaliacao.objects.filter(curso_id = pk)
+        page = self.paginate_queryset(avaliacoes)
+
+        if page not None:
+            serializer = AvaliacaoSerializer(page, many = True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = AvaliacaoSerializer(avaliacoes.all(), many = True)
         return Response(serializer.data)
     
 ''' VIEWSET PADRAO
