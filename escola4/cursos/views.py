@@ -55,7 +55,7 @@ class CursoViewSet(viewsets.ModelViewSet):
         avaliacoes = Avaliacao.objects.filter(curso_id = pk)
         page = self.paginate_queryset(avaliacoes)
 
-        if page not None:
+        if page is not None:
             serializer = AvaliacaoSerializer(page, many = True)
             return self.get_paginated_response(serializer.data)
 
