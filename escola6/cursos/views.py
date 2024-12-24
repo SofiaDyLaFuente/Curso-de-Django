@@ -5,6 +5,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import permissions
+from .permissions import EhSuperUsuario
 
 # =========================== API v1 ===========================
 
@@ -45,6 +47,12 @@ class CursoViewSet(viewsets.ModelViewSet):
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
 
+    # Permissions
+    # permission_classes = (permissions.DjangoModelPermissions)
+   
+    permissions.classes = (EhSuperUsuario, permissions.DjangoModelPermissions)
+   
+   
     @action(detail=True, methods = ['get'])
     def avaliacoes (self, request, pk=None):
         # Função que pega o curso e relaciona com as avaliações (podem ser nenhuma ou várias)
@@ -70,6 +78,6 @@ class AvaliacaoViewSet(viewsets.ModelViewSet):
 '''
 
 #VIEWSET CUSTOMIZADA
-class AvaliacaoViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class AvaliacaoViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Avaliacao.objects.all()
     serializer_class = AvaliacaoSerializer

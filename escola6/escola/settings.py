@@ -137,8 +137,17 @@ REST_FRAMEWORK = {
     ),
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 1
+    'PAGE_SIZE': 1,
 
+    # Definição dos Throttles
+    'DEFAULT_THROTTLE_CLASSES': (
+    'rest_framework.throttling.AnonRateThrottle',
+    'rest_framework.throttling.UserRateThrottle',
+    ),
 
+    'DEFAULT_THROTTLE_RATES':{
+        'anon': '2/minute', #second,day,month,year
+        'user': '3/minute'
 
+    },         
 }
