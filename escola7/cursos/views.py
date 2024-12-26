@@ -6,11 +6,9 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import permissions
-from .permissions import EhSuperUsuario
+from .permissions import EhSuperUser
 
-# =========================== API v1 ===========================
-
-# Métodos do CRUD
+# API v1
 class CursosAPIView(generics.ListCreateAPIView):
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
@@ -28,56 +26,48 @@ class AvaliacoesAPIView(generics.ListCreateAPIView):
             return self.queryset.filter(curso_id = self.kwargs.get('curso_pk'))
         return self.queryset.all()
 
-
 class AvaliacaoAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Avaliacao.objects.all()
     serializer_class = AvaliacaoSerializer
 
     def get_object(self):
         if self.kwargs.get('curso_pk'):
-            return get_object_or_404(self.get_queryset(), cruso_id=self.kwargs.get('curso_pk'), pk = self.kwargs.get('avaliacao_pk'))
-        return get_object_or_404(self.get_queryset(), pk = self.kwargs.get('avaliacao_pk'))
-    
+            return get_object_or_404(self.get_queryset(), curso_id=self.kwargs.get('curso_pk'), pk=self.kwargs.get('avaliacao_pk'))
+        return get_object_or_404(self.get_queryset(), pk=self.kwargs.get('avaliacao_pk'))
 
 
-
-# =========================== API v2 ===========================
-
+# API v2
 class CursoViewSet(viewsets.ModelViewSet):
+
+    # Permissões:
+    #1) permission_classes = (permissions.DjangoModelPermissions,)
+    permission_classes = (EhSuperUser, permissions.DjangoModelPermissions,)
+
     queryset = Curso.objects.all()
     serializer_class = CursoSerializer
 
-    # Permissions
-    # permission_classes = (permissions.DjangoModelPermissions)
-   
-    permissions.classes = (EhSuperUsuario, permissions.DjangoModelPermissions)
-   
-   
-    @action(detail=True, methods = ['get'])
-    def avaliacoes (self, request, pk=None):
-        # Função que pega o curso e relaciona com as avaliações (podem ser nenhuma ou várias)
-        # E retorna os dados serializados
-      
-        #Pagination:
-        self.paginate_class.page_size = 1
+    @action(detail=True, methods=['get'])
+    def avaliacoes(self, request, pk=None):
+        
+        # Paginação:
+        self.pagination_class.page_size = 1
         avaliacoes = Avaliacao.objects.filter(curso_id = pk)
         page = self.paginate_queryset(avaliacoes)
-
+        
         if page is not None:
-            serializer = AvaliacaoSerializer(page, many = True)
+            serializer = AvaliacaoSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = AvaliacaoSerializer(avaliacoes.all(), many = True)
+        serializer = AvaliacaoSerializer(avaliacoes.all(), many=True)
         return Response(serializer.data)
-    
-''' VIEWSET PADRAO
+
+''' ViewSet padrão
 class AvaliacaoViewSet(viewsets.ModelViewSet):
     queryset = Avaliacao.objects.all()
     serializer_class = AvaliacaoSerializer
-
 '''
 
-#VIEWSET CUSTOMIZADA
-class AvaliacaoViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+# ViewSet customizada (Retirado o 'mixins.ListModelMixin')
+class AvaliacaoViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Avaliacao.objects.all()
     serializer_class = AvaliacaoSerializer
